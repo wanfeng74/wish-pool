@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>许愿池 · 词典笔愿望墙</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23131A2E'/%3E%3Cpath d='M12 3l2.4 6.6L21 12l-6.6 2.4L12 21l-2.4-6.6L3 12l6.6-2.4z' fill='%23FFD45E'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#070A14;
+  --panel:rgba(19,24,40,.72);
+  --panel-2:rgba(26,32,52,.66);
+  --line:rgba(255,255,255,.08);
+  --line-strong:rgba(255,255,255,.16);
+  --txt:#EDF1FF;
+  --txt-2:#A8B2CC;
+  --txt-3:#6C7794;
+  --a1:#5B8CFF;
+  --a2:#22D3B8;
+  --a3:#A855F7;
+  --a4:#FFB020;
+  --a5:#FF6B8A;
+  --hot:linear-gradient(135deg,#FF6B8A,#FFB020);
+  --brand:linear-gradient(120deg,#5B8CFF,#22D3B8);
+  --r:18px;
+  --shadow:0 18px 50px -12px rgba(0,0,0,.75);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  color:var(--txt);
+  background:var(--bg);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+/* ---------- 图标 ---------- */
+.ic{display:inline-block;vertical-align:-2px;flex:none;fill:currentColor;color:inherit}
+.ic svg{display:block;width:100%;height:100%;fill:currentColor}
+.ic>use{fill:currentColor}
+.ic-10{width:10px;height:10px}
+.ic-12{width:12px;height:12px}
+.ic-14{width:14px;height:14px}
+.ic-16{width:16px;height:16px}
+.ic-18{width:18px;height:18px}
+.ic-22{width:22px;height:22px}
+.ic-26{width:26px;height:26px}
+.ic-34{width:34px;height:34px}
+.ic-52{width:52px;height:52px}
+.medal{display:flex;align-items:center;justify-content:center;height:18px}
+
+/* ---------- 动态极光背景 ---------- */
+.bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:
+  radial-gradient(ellipse 80% 55% at 50% -8%,rgba(78,116,255,.30),transparent 62%),
+  radial-gradient(ellipse 70% 50% at 8% 105%,rgba(18,200,168,.20),transparent 60%),
+  radial-gradient(ellipse 60% 45% at 96% 88%,rgba(168,85,247,.20),transparent 60%),
+  radial-gradient(ellipse 50% 40% at 50% 55%,rgba(255,59,107,.10),transparent 65%)}
+.blob{position:absolute;border-radius:50%;filter:blur(78px);opacity:.8;will-change:transform;mix-blend-mode:screen}
+.b1{width:720px;height:720px;background:radial-gradient(circle,#4C7BFF,transparent 66%);top:-260px;left:-180px;animation:drift1 26s ease-in-out infinite}
+.b2{width:640px;height:640px;background:radial-gradient(circle,#12D8B4,transparent 66%);bottom:-240px;right:-160px;animation:drift2 32s ease-in-out infinite}
+.b3{width:600px;height:600px;background:radial-gradient(circle,#9B4DFF,transparent 66%);top:30%;left:44%;animation:drift3 38s ease-in-out infinite}
+.b4{width:500px;height:500px;background:radial-gradient(circle,#FF4D7D,transparent 68%);bottom:-160px;left:6%;opacity:.5;animation:drift1 30s ease-in-out infinite reverse}
+.b5{width:460px;height:460px;background:radial-gradient(circle,#FFB020,transparent 70%);top:12%;right:2%;opacity:.38;animation:drift2 36s ease-in-out infinite reverse}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(90px,70px) scale(1.14)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-100px,-60px) scale(1.1)}}
+@keyframes drift3{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-42%,-56%) scale(1.2)}}
+.grid-overlay{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.028) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:56px 56px;
+  mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 35%,transparent 100%);
+  -webkit-mask-image:radial-gradient(ellipse 90% 70% at 50% 30%,#000 35%,transparent 100%);}
+.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+/* ---------- 布局 ---------- */
+.wrap{position:relative;z-index:2;max-width:1440px;margin:0 auto;padding:26px 26px 70px}
+
+/* ---------- 顶栏 ---------- */
+header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:26px}
+.logo{display:flex;align-items:center;gap:13px;min-width:0}
+.logo-mark{width:50px;height:50px;border-radius:15px;display:flex;align-items:center;justify-content:center;
+  color:#0C1020;
+  background:var(--brand);box-shadow:0 10px 30px -8px rgba(91,140,255,.7),inset 0 1px 0 rgba(255,255,255,.35);
+  position:relative;overflow:hidden;flex:none}
+.logo-mark::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.55),transparent 70%);
+  transform:translateX(-130%);animation:shine 5.5s ease-in-out infinite}
+@keyframes shine{0%,72%{transform:translateX(-130%)}88%,100%{transform:translateX(130%)}}
+.logo h1{font-size:22px;font-weight:800;letter-spacing:.3px;line-height:1.15;
+  background:linear-gradient(100deg,#fff 20%,#B9CBFF 60%,#8CE8D8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.logo p{font-size:12.5px;color:var(--txt-3);margin-top:3px;letter-spacing:.4px}
+.spacer{flex:1}
+.live-pill{display:flex;align-items:center;gap:8px;padding:9px 15px;border-radius:999px;
+  background:rgba(34,211,184,.09);border:1px solid rgba(34,211,184,.3);font-size:12.5px;
+  color:#7FE9D4;font-weight:600;backdrop-filter:blur(12px);white-space:nowrap}
+.dot{width:7px;height:7px;border-radius:50%;background:#22D3B8;box-shadow:0 0 0 0 rgba(34,211,184,.7);animation:pulse 1.9s infinite}
+.dot.off{background:#FF6B8A;box-shadow:none;animation:none}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,211,184,.65)}70%{box-shadow:0 0 0 9px rgba(34,211,184,0)}100%{box-shadow:0 0 0 0 rgba(34,211,184,0)}}
+.btn{border:none;cursor:pointer;font-family:inherit;font-weight:700;transition:.22s cubic-bezier(.34,1.4,.64,1)}
+.btn-primary{padding:12px 22px;border-radius:13px;font-size:14px;color:#fff;background:var(--brand);
+  box-shadow:0 12px 30px -10px rgba(91,140,255,.85),inset 0 1px 0 rgba(255,255,255,.28);white-space:nowrap}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 38px -10px rgba(91,140,255,.95),inset 0 1px 0 rgba(255,255,255,.4)}
+.btn-primary:active{transform:translateY(0) scale(.98)}
+
+/* ---------- 统计卡 ---------- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+.stat{position:relative;padding:18px 20px;border-radius:var(--r);background:var(--panel);
+  border:1px solid var(--line);backdrop-filter:blur(20px);box-shadow:var(--shadow);overflow:hidden}
+.stat::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px;background:var(--brand)}
+.stat.s2::before{background:linear-gradient(180deg,#22D3B8,#5B8CFF)}
+.stat.s3::before{background:linear-gradient(180deg,#FFB020,#FF6B8A)}
+.stat.s4::before{background:linear-gradient(180deg,#A855F7,#5B8CFF)}
+.stat .k{font-size:11.5px;color:var(--txt-3);letter-spacing:1px;font-weight:600;text-transform:uppercase}
+.stat .v{font-size:32px;font-weight:800;margin-top:7px;letter-spacing:-.8px;font-variant-numeric:tabular-nums;
+  background:linear-gradient(180deg,#fff,#A9BDF5);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.stat .v.bump{animation:bump .55s cubic-bezier(.34,1.6,.64,1)}
+@keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.16)}100%{transform:scale(1)}}
+
+/* ---------- 提交卡 ---------- */
+.compose{border-radius:22px;padding:22px;margin-bottom:24px;position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(30,38,64,.9),rgba(17,22,38,.86));
+  border:1px solid var(--line-strong);box-shadow:var(--shadow);backdrop-filter:blur(24px)}
+.compose::after{content:"";position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(140,232,216,.85),rgba(91,140,255,.85),transparent)}
+.compose-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.compose-head h3{font-size:15.5px;font-weight:800}
+.compose-head span{font-size:12px;color:var(--txt-3)}
+.cats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:13px}
+.cat{padding:8px 15px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;
+  border:1px solid var(--line-strong);background:rgba(255,255,255,.035);color:var(--txt-2);transition:.2s}
+.cat:hover{background:rgba(255,255,255,.08);transform:translateY(-1px);color:#fff}
+.cat.on{color:#fff;border-color:transparent;box-shadow:0 8px 22px -8px currentColor;transform:translateY(-1px)}
+.field-row{display:flex;gap:10px;flex-wrap:wrap}
+input[type=text],input[type=password],textarea{font-family:inherit;font-size:14px;color:var(--txt);
+  background:rgba(8,11,20,.6);border:1px solid var(--line-strong);border-radius:13px;
+  padding:13px 16px;outline:none;transition:.2s;width:100%}
+input[type=text]::placeholder,input[type=password]::placeholder,textarea::placeholder{color:var(--txt-3)}
+input[type=text]:focus,input[type=password]:focus,textarea:focus{border-color:rgba(91,140,255,.75);background:rgba(8,11,20,.85);
+  box-shadow:0 0 0 4px rgba(91,140,255,.14)}
+textarea{resize:vertical;min-height:70px;line-height:1.55}
+.compose .title-in{flex:1;min-width:220px;font-size:15px;font-weight:600}
+.compose .nick-in{width:170px;flex:none}
+.compose-foot{display:flex;align-items:center;gap:12px;margin-top:13px;flex-wrap:wrap}
+.counter{font-size:12px;color:var(--txt-3);font-variant-numeric:tabular-nums}
+.counter.warn{color:#FFB020}
+.hint{font-size:12px;color:var(--txt-3);display:flex;align-items:center;gap:6px}
+
+/* ---------- 工具栏 ---------- */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.seg{display:flex;background:rgba(17,22,38,.8);border:1px solid var(--line);border-radius:13px;padding:4px;backdrop-filter:blur(16px)}
+.seg button{padding:9px 18px;border-radius:10px;font-size:13px;font-weight:700;border:none;background:transparent;
+  color:var(--txt-2);cursor:pointer;transition:.2s;font-family:inherit;white-space:nowrap}
+.seg button.on{background:rgba(91,140,255,.2);color:#fff;box-shadow:inset 0 0 0 1px rgba(91,140,255,.4)}
+.seg button:hover:not(.on){color:#fff}
+.search{position:relative;flex:1;min-width:190px;max-width:330px}
+.search input{padding-left:40px;font-size:13px;border-radius:13px}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:15px;height:15px;
+  stroke:var(--txt-3);fill:none;stroke-width:2.2;pointer-events:none}
+.count-label{font-size:12.5px;color:var(--txt-3);font-variant-numeric:tabular-nums}
+
+/* ---------- 愿望列表 ---------- */
+.list{display:flex;flex-direction:column;gap:13px}
+.card{position:relative;display:flex;gap:16px;padding:18px 20px;border-radius:var(--r);
+  background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(20px);
+  transition:transform .28s cubic-bezier(.34,1.3,.64,1),border-color .22s,box-shadow .22s,background .22s;
+  animation:cardIn .45s cubic-bezier(.22,1,.36,1) both;overflow:hidden}
+@keyframes cardIn{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cc,var(--a1));
+  opacity:.85;border-radius:3px}
+.card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.22);
+  background:rgba(28,35,58,.9);
+  box-shadow:0 24px 54px -18px rgba(0,0,0,.9),0 0 0 1px var(--cc,transparent),0 -12px 40px -22px var(--cc,transparent)}
+.card:hover::before{opacity:1;box-shadow:0 0 18px 2px var(--cc,var(--a1))}
+/* 榜首卡片：流光描边 */
+.card:first-child{background:linear-gradient(140deg,rgba(46,40,26,.72),rgba(19,24,40,.78))}
+.card:first-child::after{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+  background:linear-gradient(115deg,rgba(255,212,94,.85),rgba(255,140,60,.25) 38%,transparent 62%,rgba(255,212,94,.5));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.85}
+.card.is-new{animation:newGlow 2.6s ease-out 1}
+@keyframes newGlow{0%{box-shadow:0 0 0 0 rgba(34,211,184,.6),0 18px 50px -12px rgba(0,0,0,.75)}
+  45%{box-shadow:0 0 0 5px rgba(34,211,184,.22),0 18px 50px -12px rgba(0,0,0,.75)}
+  100%{box-shadow:0 18px 50px -12px rgba(0,0,0,.75)}}
+
+/* 排名徽章 */
+.rank{width:42px;flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:2px}
+.rank-n{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:-.5px;color:var(--txt-3)}
+.card:nth-child(1) .rank-n{color:#FFD45E;text-shadow:0 0 18px rgba(255,212,94,.6)}
+.card:nth-child(2) .rank-n{color:#CBD5E8}
+.card:nth-child(3) .rank-n{color:#E0A273}
+.medal{font-size:15px;line-height:1}
+
+.main{flex:1;min-width:0}
+.top-line{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.w-title{font-size:16px;font-weight:800;letter-spacing:.1px;line-height:1.35;word-break:break-word}
+.tag{font-size:10.5px;font-weight:800;padding:3.5px 9px;border-radius:7px;letter-spacing:.4px;
+  border:1px solid currentColor;white-space:nowrap;flex:none}
+.w-desc{font-size:13px;color:var(--txt-2);line-height:1.65;margin-bottom:9px;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-wrap}
+.meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--txt-3)}
+.meta .who{display:flex;align-items:center;gap:6px}
+.avatar{width:19px;height:19px;border-radius:50%;display:grid;place-items:center;font-size:9.5px;font-weight:800;
+  color:#0A0E18;background:var(--av,var(--a1));flex:none}
+.heat{display:flex;align-items:center;gap:6px;flex:1;min-width:90px;max-width:210px}
+.heat-track{flex:1;height:4px;border-radius:99px;background:rgba(255,255,255,.09);overflow:hidden}
+.heat-fill{height:100%;border-radius:99px;background:var(--hot);transition:width .65s cubic-bezier(.22,1,.36,1);width:0}
+
+/* +1 按钮 */
+.vote{flex:none;align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;width:70px;height:66px;border-radius:15px;cursor:pointer;border:1px solid var(--line-strong);
+  background:rgba(255,255,255,.045);color:var(--txt);font-family:inherit;
+  transition:.24s cubic-bezier(.34,1.5,.64,1);position:relative;overflow:hidden}
+.vote:hover{transform:translateY(-2px);background:rgba(91,140,255,.16);border-color:rgba(91,140,255,.55);
+  box-shadow:0 12px 28px -12px rgba(91,140,255,.9)}
+.vote:active{transform:scale(.94)}
+.vote .plus{display:flex;align-items:center;justify-content:center;height:15px;
+  font-size:15px;font-weight:900;line-height:1;color:#8FB0FF;transition:.2s}
+.vote .plus .ic{color:inherit}
+.vote .cnt{font-size:20px;font-weight:900;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.vote .lbl{font-size:9.5px;color:var(--txt-3);letter-spacing:.5px;font-weight:700}
+.vote.voted{background:linear-gradient(150deg,rgba(34,211,184,.24),rgba(91,140,255,.2));
+  border-color:rgba(34,211,184,.5);box-shadow:0 0 0 1px rgba(34,211,184,.25),0 10px 26px -12px rgba(34,211,184,.85)}
+.vote.voted .plus{color:#5CF0D6}
+.vote.voted .cnt{color:#8FF5E4}
+.vote.pop{animation:votePop .5s cubic-bezier(.34,1.6,.64,1)}
+@keyframes votePop{0%{transform:scale(1)}32%{transform:scale(1.13)}100%{transform:scale(1)}}
+/* 点击迸发的 +1 浮字 */
+.floaty{position:fixed;pointer-events:none;z-index:99;font-size:15px;font-weight:900;color:#5CF0D6;
+  text-shadow:0 0 14px rgba(92,240,214,.9);animation:floatUp .95s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes floatUp{0%{opacity:1;transform:translate(-50%,0) scale(.7)}
+  35%{opacity:1;transform:translate(-50%,-26px) scale(1.18)}
+  100%{opacity:0;transform:translate(-50%,-62px) scale(.92)}}
+
+/* 认领徽标 / 按钮 */
+.claim-btn,.claim-badge{font-family:inherit;cursor:pointer;border-radius:8px;font-weight:800;
+  transition:.2s cubic-bezier(.34,1.4,.64,1);white-space:nowrap;flex:none}
+.claim-btn{padding:4px 10px;font-size:11px;color:#8FB0FF;background:rgba(91,140,255,.12);
+  border:1px dashed rgba(91,140,255,.5)}
+.claim-btn:hover{background:rgba(91,140,255,.24);border-style:solid;transform:translateY(-1px);color:#fff}
+.claim-badge{padding:4px 11px;font-size:11px;color:#C7A9FF;background:rgba(168,85,247,.16);
+  border:1px solid rgba(168,85,247,.45);display:inline-flex;align-items:center;gap:5px}
+.claim-badge:hover{background:rgba(168,85,247,.28);transform:translateY(-1px)}
+.claim-badge.mine{color:#8FF5E4;background:rgba(34,211,184,.15);border-color:rgba(34,211,184,.45)}
+.claim-badge.mine:hover{background:rgba(34,211,184,.26)}
+.claim-dot{width:5px;height:5px;border-radius:50%;background:currentColor;
+  box-shadow:0 0 6px currentColor;animation:pulse 2s infinite}
+/* 认领弹窗 */
+.modal-mask{position:fixed;inset:0;z-index:150;background:rgba(4,6,12,.78);
+  backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-mask.show{display:flex;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{width:100%;max-width:430px;border-radius:22px;padding:26px;
+  background:linear-gradient(165deg,rgba(32,40,68,.98),rgba(16,21,36,.98));
+  border:1px solid rgba(255,255,255,.16);box-shadow:0 40px 90px -24px rgba(0,0,0,.95);
+  animation:modalIn .32s cubic-bezier(.22,1,.36,1) both}
+@keyframes modalIn{from{opacity:0;transform:translateY(22px) scale(.95)}to{opacity:1;transform:none}}
+.modal-ico{font-size:34px;margin-bottom:12px}
+.modal-hd{font-size:18px;font-weight:900;margin-bottom:7px}
+.modal-sub{font-size:13px;color:var(--txt-2);line-height:1.6;margin-bottom:16px;
+  padding:11px 14px;border-radius:11px;background:rgba(255,255,255,.045);
+  border-left:3px solid rgba(168,85,247,.7)}
+.modal label{display:block;font-size:12px;color:var(--txt-3);font-weight:700;
+  letter-spacing:.4px;margin-bottom:7px}
+.modal input{font-size:14px}
+.modal-foot{display:flex;gap:10px;margin-top:20px}
+.modal-foot button{flex:1;padding:13px;border-radius:13px;font-size:14px;border:none;
+  font-family:inherit;font-weight:800;cursor:pointer;transition:.2s}
+.btn-ghost{background:rgba(255,255,255,.07);color:var(--txt-2);border:1px solid var(--line-strong)!important}
+.btn-ghost:hover{background:rgba(255,255,255,.13);color:#fff}
+.btn-confirm{background:linear-gradient(120deg,#A855F7,#5B8CFF);color:#fff;
+  box-shadow:0 12px 30px -12px rgba(168,85,247,.9)}
+.btn-confirm:hover{transform:translateY(-2px);box-shadow:0 18px 38px -12px rgba(168,85,247,1)}
+.btn-confirm:disabled{opacity:.55;cursor:not-allowed;transform:none}
+
+/* 状态徽标 */
+.st{display:inline-flex;align-items:center;gap:4px;padding:3.5px 9px;border-radius:7px;
+  font-size:10.5px;font-weight:800;letter-spacing:.3px;flex:none;
+  border:1px solid currentColor;background:rgba(255,255,255,.04)}
+.st-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.st-open{color:#8B95B0}
+.st-doing{color:#5B8CFF;background:rgba(91,140,255,.14);border-color:rgba(91,140,255,.5)}
+.st-doing .st-dot{animation:pulse 1.8s infinite}
+.st-done{color:#22D3B8;background:rgba(34,211,184,.14);border-color:rgba(34,211,184,.5)}
+.st-rejected{color:#6C7794;background:rgba(108,119,148,.12);border-color:rgba(108,119,148,.35)}
+.card.st-rejected-card{opacity:.62}
+.card.st-done-card .w-title{text-decoration:line-through;text-decoration-color:rgba(34,211,184,.5)}
+
+/* 管理条 */
+.admin-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;
+  padding:13px 17px;border-radius:15px;background:rgba(168,85,247,.09);
+  border:1px solid rgba(168,85,247,.32);backdrop-filter:blur(16px)}
+.admin-bar.show{display:flex}
+.admin-bar .ab-title{font-size:13px;font-weight:800;color:#D9C4FF;display:flex;align-items:center;gap:7px}
+.admin-bar .ab-sp{flex:1}
+.admin-tog{padding:9px 15px;border-radius:11px;font-size:12.5px;font-weight:800;cursor:pointer;
+  border:1px solid var(--line-strong);background:rgba(255,255,255,.05);color:var(--txt-2);
+  font-family:inherit;transition:.2s}
+.admin-tog:hover{background:rgba(255,255,255,.11);color:#fff}
+.admin-tog.on{background:rgba(168,85,247,.24);border-color:rgba(168,85,247,.6);color:#fff}
+
+/* 卡片管理操作 */
+.card-ops{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px;
+  padding-top:9px;border-top:1px dashed rgba(255,255,255,.09)}
+.op{font-family:inherit;font-size:11px;font-weight:800;padding:5px 11px;border-radius:8px;
+  cursor:pointer;border:1px solid var(--line-strong);background:rgba(255,255,255,.05);
+  color:var(--txt-2);transition:.18s}
+.op:hover{background:rgba(255,255,255,.12);color:#fff}
+.op-doing:hover{border-color:rgba(91,140,255,.7);color:#8FB0FF}
+.op-done:hover{border-color:rgba(34,211,184,.7);color:#5CF0D6}
+.op-rej:hover{border-color:rgba(255,107,138,.6);color:#FF9BAE}
+.op-del:hover{border-color:rgba(255,107,138,.8);color:#FF6B8A;background:rgba(255,107,138,.14)}
+.op-on{background:rgba(91,140,255,.24);border-color:rgba(91,140,255,.7);color:#fff}
+
+/* 删除确认弹窗复用 .modal */
+
+.empty{text-align:center;padding:74px 22px;border-radius:22px;border:1px dashed var(--line-strong);
+  background:rgba(17,22,38,.5);backdrop-filter:blur(14px)}
+.empty .ico{font-size:52px;margin-bottom:16px;opacity:.9;animation:float 3.4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+.empty h4{font-size:17px;font-weight:800;margin-bottom:8px}
+.empty p{font-size:13px;color:var(--txt-3);line-height:1.7}
+
+/* Toast */
+.toasts{position:fixed;bottom:26px;left:50%;transform:translateX(-50%);z-index:200;
+  display:flex;flex-direction:column;gap:10px;align-items:center;pointer-events:none}
+.toast{padding:12px 22px;border-radius:13px;font-size:13.5px;font-weight:700;
+  background:rgba(20,26,44,.96);border:1px solid var(--line-strong);backdrop-filter:blur(20px);
+  box-shadow:0 18px 44px -14px rgba(0,0,0,.9);animation:toastIn .35s cubic-bezier(.34,1.5,.64,1) both;
+  max-width:88vw;text-align:center}
+.toast.ok{border-color:rgba(34,211,184,.5);color:#8FF5E4}
+.toast.err{border-color:rgba(255,107,138,.5);color:#FFB3C2}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastIn{from{opacity:0;transform:translateY(18px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(12px) scale(.96)}}
+
+/* 页脚 */
+footer{text-align:center;margin-top:44px;font-size:12px;color:var(--txt-3);line-height:1.9}
+footer b{color:var(--txt-2);font-weight:700}
+
+/* 滚动条 */
+::-webkit-scrollbar{width:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.13);border-radius:99px;border:3px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.24)}
+
+/* 响应式 */
+@media(max-width:1000px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .b3{display:none}
+}
+@media(max-width:720px){
+  .wrap{padding:18px 14px 60px}
+  .stats{gap:10px}
+  .stat{padding:14px 15px}
+  .stat .v{font-size:25px}
+  .logo h1{font-size:18.5px}
+  .logo-mark{width:44px;height:44px;font-size:22px;border-radius:13px}
+  .card{padding:15px 14px;gap:11px}
+  .rank{width:30px}
+  .rank-n{font-size:15px}
+  .w-title{font-size:14.5px}
+  .w-desc{font-size:12.5px}
+  .vote{width:60px;height:60px;border-radius:13px}
+  .vote .cnt{font-size:17px}
+  .compose{padding:16px;border-radius:18px}
+  .compose .nick-in{width:100%}
+  .toolbar{gap:9px}
+  .search{max-width:none;flex-basis:100%}
+  .heat{display:none}
+  .live-pill{order:3}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<!-- ============ 图标精灵（全部矢量，无 emoji） ============ -->
+<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true" focusable="false">
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l2.7 7.1L22 12l-7.3 2.9L12 22l-2.7-7.1L2 12l7.3-2.9z"/></symbol>
+  <symbol id="i-fire" viewBox="0 0 24 24"><path d="M12.8 2c.3 2.7 2.1 3.7 3.3 5.5 1.7 2.5 1.7 5.4.3 7.6-.9 1.4-2.3 2.4-3.9 2.8.8-1.2.9-2.6.3-3.9-.6-1.3-1.7-2.1-2.4-3.2-.6 1.7-1.4 2.3-2.3 3.4-.8 1-1.1 2.3-.7 3.5-1.7-.8-2.8-2.3-3.1-4.1-.4-2.3.6-4.4 2.2-6C9.1 8.6 11.9 7.2 12.8 2z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 2.2a7.8 7.8 0 110 15.6 7.8 7.8 0 010-15.6zM11.2 6v6.6l5.2 3 1-1.7-4.3-2.5V6z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M12 3a9 9 0 019 9h-2.4A6.6 6.6 0 1012 18.6v2.4A9 9 0 0112 3z"/><path d="M11 1.6L15.4 6 11 10.4V1.6z"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24"><path d="M2.5 6.8l4.6 3.5L12 3.2l4.9 7.1 4.6-3.5-1.7 12.4H4.2z"/></symbol>
+  <symbol id="i-medal" viewBox="0 0 24 24"><path d="M7.6 2l2.2 5.2h4.4L16.4 2h2.6l-2.8 6.3A6.4 6.4 0 0112 20.8a6.4 6.4 0 01-4.2-12.5L5 2z"/><path d="M12 9.6a3.6 3.6 0 100 7.2 3.6 3.6 0 000-7.2z" fill="#0A0E18" opacity=".35"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M4.6 2h2.2v20H4.6zM7.8 3.2H20l-2.9 4.3L20 11.8H7.8z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M10.9 3.6h2.2v7.3h7.3v2.2h-7.3v7.3h-2.2v-7.3H3.6v-2.2h7.3z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.3 17.9L3.4 12l1.7-1.7 4.2 4.2L19 4.8l1.7 1.7z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 4.6L12 10.2l5.6-5.6 1.8 1.8L13.8 12l5.6 5.6-1.8 1.8L12 13.8l-5.6 5.6-1.8-1.8L10.2 12 4.6 6.4z"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><path d="M12 2a4.6 4.6 0 014.6 4.6V9h.9a2 2 0 012 2v8a2 2 0 01-2 2H6.5a2 2 0 01-2-2v-8a2 2 0 012-2h.9V6.6A4.6 4.6 0 0112 2zm0 2.2a2.4 2.4 0 00-2.4 2.4V9h4.8V6.6A2.4 2.4 0 0012 4.2z"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M13.4 2A10 10 0 1022 14.6 8.2 8.2 0 0113.4 2z"/></symbol>
+  <symbol id="i-pencil" viewBox="0 0 24 24"><path d="M3 17.2V21h3.8L18 9.8 14.2 6zM20.7 7.1a1 1 0 000-1.4l-2.4-2.4a1 1 0 00-1.4 0l-1.6 1.6L19 8.7z"/></symbol>
+</svg>
+<div class="bg"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div><div class="blob b5"></div></div>
+<div class="grid-overlay"></div>
+<div class="noise"></div>
+
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <div class="logo-mark"><svg class="ic ic-26"><use href="#i-star"/></svg></div>
+      <div>
+        <h1>词典笔许愿池</h1>
+        <p>说出你想要的 App · 大家一起 +1</p>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="live-pill" id="live"><span class="dot off" id="liveDot"></span><span id="liveTxt">正在连接…</span></div>
+    <button class="btn btn-primary" id="composeBtn">＋ 许个愿</button>
+    <button class="btn-ghost" id="adminBtn" title="管理员登录" style="padding:12px 16px;border-radius:13px;font-size:13px">管理</button>
+  </header>
+
+  <!-- 统计 -->
+  <section class="stats">
+    <div class="stat s1"><div class="k">愿望总数</div><div class="v" id="s-wishes">0</div></div>
+    <div class="stat s2"><div class="k">累计支持</div><div class="v" id="s-votes">0</div></div>
+    <div class="stat s3"><div class="k">今日新增</div><div class="v" id="s-today">0</div></div>
+    <div class="stat s4"><div class="k">参与笔友</div><div class="v" id="s-contrib">0</div></div>
+  </section>
+
+  <!-- 提交 -->
+  <section class="compose" id="compose">
+    <div class="compose-head"><h3><svg class="ic ic-16"><use href="#i-star"/></svg> 许个愿</h3><span>写下你希望在词典笔上看到的 App 或功能</span></div>
+    <div class="cats" id="cats"></div>
+    <div class="field-row">
+      <input type="text" id="in-title" class="title-in" maxlength="40" placeholder="一句话说清你的愿望，例如：笔上哔哩下载收藏">
+      <input type="text" id="in-nick" class="nick-in" maxlength="20" placeholder="你的昵称（可选）">
+    </div>
+    <div style="margin-top:10px">
+      <textarea id="in-desc" maxlength="300" placeholder="再补充点细节：想要什么功能、怎么用最顺手…（可选）"></textarea>
+    </div>
+    <div class="compose-foot">
+      <button class="btn btn-primary" id="submitBtn">提交愿望</button>
+      <span class="counter" id="counter">0 / 40</span>
+      <span class="hint"><svg class="ic ic-12"><use href="#i-lock"/></svg> 提交后所有人可见，可被 +1 支持</span>
+    </div>
+  </section>
+
+  <!-- 工具栏 -->
+  <div class="toolbar">
+    <div class="seg" id="seg">
+      <button data-sort="votes" class="on"><svg class="ic ic-12"><use href="#i-fire"/></svg> 最想要</button>
+      <button data-sort="new"><svg class="ic ic-12"><use href="#i-clock"/></svg> 最新</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="text" id="in-q" placeholder="搜索愿望…" maxlength="40">
+    </div>
+    <div class="spacer"></div>
+    <span class="count-label" id="countLabel">—</span>
+  </div>
+
+  <!-- 管理条 -->
+  <div class="admin-bar" id="adminBar">
+    <span class="ab-title">
+      <svg class="ic ic-14"><use href="#i-lock"/></svg>
+      管理员模式
+    </span>
+    <span class="ab-sp"></span>
+    <button class="admin-tog on" id="tabActive">正常愿望</button>
+    <button class="admin-tog" id="tabTrash">回收站 <span id="trashCount">0</span></button>
+    <button class="admin-tog" id="btnRelease">发布更新</button>
+    <button class="admin-tog" id="btnPurge">清空回收站</button>
+    <button class="admin-tog" id="btnLogout">退出</button>
+  </div>
+
+  <div class="list" id="list"></div>
+  <footer>
+    <b>词典笔许愿池</b> · 数据实时同步 · 所有愿望按支持度排序<br>
+    服务端口 <b>17613</b> · <span id="rev">rev —</span>
+  </footer>
+</div>
+
+<!-- 管理员登录弹窗 -->
+<div class="modal-mask" id="loginMask">
+  <div class="modal">
+    <div class="modal-ico"><svg class="ic ic-34"><use href="#i-lock"/></svg></div>
+    <div class="modal-hd">管理员登录</div>
+    <div class="modal-sub">登录后可调整愿望状态、删除与恢复愿望</div>
+    <label for="loginPass">管理密码</label>
+    <input type="password" id="loginPass" placeholder="输入管理密码" autocomplete="current-password">
+    <div class="modal-foot">
+      <button class="btn-ghost" id="loginCancel">取消</button>
+      <button class="btn-confirm" id="loginOk">登录</button>
+    </div>
+  </div>
+</div>
+
+<!-- 发布更新弹窗 -->
+<div class="modal-mask" id="relMask">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-hd">发布应用更新</div>
+    <div class="modal-sub" id="relCurrent">尚未发布任何版本</div>
+
+    <label for="relFile">安装包（服务器 pkg 目录）</label>
+    <select id="relFile" style="width:100%;font-family:inherit;font-size:14px;color:var(--txt);
+      background:rgba(8,11,20,.6);border:1px solid var(--line-strong);border-radius:13px;padding:13px 16px;outline:none"></select>
+
+    <label for="relUpload" style="margin-top:14px">或上传新包（.amr）</label>
+    <input type="file" id="relUpload" accept=".amr" style="font-size:13px;color:var(--txt-2)">
+
+    <label for="relVersion" style="margin-top:14px">版本号</label>
+    <input type="text" id="relVersion" placeholder="例如 1.3.0">
+
+    <label for="relNotes" style="margin-top:14px">更新说明</label>
+    <textarea id="relNotes" rows="3" placeholder="本次更新内容…"></textarea>
+
+    <label style="margin-top:14px;display:flex;align-items:center;gap:9px;cursor:pointer">
+      <input type="checkbox" id="relForce" style="width:auto"> <span>强制更新（客户端不可跳过）</span>
+    </label>
+
+    <div class="modal-foot">
+      <button class="btn-ghost" id="relCancel">取消</button>
+      <button class="btn-confirm" id="relOk">发布</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<!-- 认领弹窗 -->
+<div class="modal-mask" id="claimMask">
+  <div class="modal">
+    <div class="modal-ico"><svg class="ic ic-34"><use href="#i-flag"/></svg></div>
+    <div class="modal-hd" id="claimHd">认领这个愿望</div>
+    <div class="modal-sub" id="claimWishTitle"></div>
+    <label for="claimNick">你的昵称（会记录到服务端）</label>
+    <input type="text" id="claimNick" maxlength="20" placeholder="例如：洛">
+    <label for="claimPass" style="margin-top:14px">管理密码（认领需要管理员权限）</label>
+    <input type="password" id="claimPass" placeholder="输入管理密码" autocomplete="current-password">
+    <div class="modal-foot">
+      <button class="btn-ghost" id="claimCancel">取消</button>
+      <button class="btn-confirm" id="claimOk">确认认领</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ---------------- 状态 ----------------
+var BASE = location.origin;
+var state = {
+  items: [],
+  stats: {wishes:0,votes:0,today:0,contributors:0},
+  sort: "votes",
+  q: "",
+  category: "",
+  categories: [],
+  seenRev: 0,
+  newIds: {},          // 新增高亮
+  clientId: null,
+  nick: "",
+  rev: 0
+};
+
+// ---------------- 工具 ----------------
+function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+  });
+}
+function el(tag, cls, txt){
+  var d=document.createElement(tag);
+  if(cls) d.className=cls;
+  if(txt!=null) d.textContent=txt;
+  return d;
+}
+function catOf(id){
+  for(var i=0;i<state.categories.length;i++) if(state.categories[i].id===id) return state.categories[i];
+  return {id:"other",name:"其它想法",color:"#8B95B0"};
+}
+function timeAgo(ts){
+  var d = Math.floor(Date.now()/1000) - ts;
+  if(d < 60) return "刚刚";
+  if(d < 3600) return Math.floor(d/60) + " 分钟前";
+  if(d < 86400) return Math.floor(d/3600) + " 小时前";
+  if(d < 86400*30) return Math.floor(d/86400) + " 天前";
+  var dt = new Date(ts*1000);
+  return (dt.getMonth()+1) + "月" + dt.getDate() + "日";
+}
+function store(k, v){
+  try{
+    if(v === undefined) return localStorage.getItem(k);
+    localStorage.setItem(k, v);
+  }catch(e){ return null; }
+}
+
+// ---------------- 认领 ----------------
+var claimTargetId = 0;
+
+function onClaimClick(w, ev){
+  if(w.claimed){
+    if(w.claim_mine){
+      releaseClaim(w);
+    } else {
+      toast("已被「" + w.claimed_by + "」认领","err");
+    }
+    return;
+  }
+  // 打开认领弹窗
+  claimTargetId = w.id;
+  $("claimWishTitle").textContent = "「" + w.title + "」";
+  $("claimHd").textContent = "认领这个愿望";
+  var nickEl = $("claimNick");
+  nickEl.value = state.nick || "";
+  var passEl = $("claimPass");
+  passEl.value = admin.on ? admin.pass : "";
+  $("claimMask").classList.add("show");
+  setTimeout(function(){ (passEl.value ? nickEl : passEl).focus(); }, 120);
+}
+
+/** 释放认领（需要管理密码） */
+function releaseClaim(w){
+  var pass = admin.on ? admin.pass : (window.prompt("释放认领需要管理密码", "") || "");
+  if(!pass) return;
+  if(!confirm("释放对「" + w.title + "」的认领？")) return;
+  fetch(BASE + "/api/wish/" + w.id + "/release?client_id=" + encodeURIComponent(state.clientId||""), {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", "X-Admin-Pass": pass }
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){
+        toast(d.error || "操作失败","err");
+        return;
+      }
+      toast("已释放认领","ok");
+      applyClaim(w.id, "");
+    }).catch(function(){ toast("网络异常","err"); });
+}
+
+function closeClaimModal(){
+  $("claimMask").classList.remove("show");
+  $("claimPass").value = "";
+  claimTargetId = 0;
+}
+
+function submitClaim(){
+  if(!claimTargetId) return;
+  var nick = ($("claimNick").value || "").trim();
+  if(!nick){ toast("请填写昵称","err"); $("claimNick").focus(); return; }
+  var pass = ($("claimPass").value || "").trim();
+  if(!pass){ toast("请输入管理密码","err"); $("claimPass").focus(); return; }
+  var btn = $("claimOk");
+  btn.disabled = true; btn.textContent = "认领中…";
+
+  fetch(BASE + "/api/wish/" + claimTargetId + "/claim", {
+    method:"POST",
+    headers:{ "Content-Type":"application/json", "X-Admin-Pass": pass },
+    body: JSON.stringify({nick: nick, client_id: state.clientId})
+  }).then(function(r){ return r.json().then(function(d){ return {code:r.status, d:d}; }); })
+    .then(function(res){
+      btn.disabled = false; btn.textContent = "确认认领";
+      var d = res.d;
+      if(!d.ok){
+        toast(d.error || "认领失败","err");
+        if(res.code === 409 || res.code === 401){
+          if(res.code === 401){
+            $("claimPass").value = "";
+            $("claimPass").focus();
+          } else {
+            closeClaimModal();
+            load();
+          }
+        }
+        return;
+      }
+      state.nick = nick;
+      store("wish_nick", nick);
+      if($("in-nick")) $("in-nick").value = nick;
+      closeClaimModal();
+      toast("已认领，服务端已记录「" + nick + "」","ok");
+      applyClaim(d.wish.id, d.wish.claimed_by);
+      renderStats(d.stats);
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = "确认认领";
+      toast("网络异常，请重试","err");
+    });
+}
+
+function applyClaim(id, claimedBy){
+  var w = findItem(id);
+  if(w){
+    w.claimed = !!claimedBy;
+    w.claimed_by = claimedBy || "";
+    w.claim_mine = !!claimedBy && claimedBy === state.nick;
+    if(claimedBy) w.claimed_at = Math.floor(Date.now()/1000);
+  }
+  render();
+}
+
+// ---------------- 管理员 ----------------
+var admin = { pass: '', on: false, view: 'active', statuses: [] };
+
+function adminHeaders() {
+  return { 'Content-Type': 'application/json', 'X-Admin-Pass': admin.pass };
+}
+
+function openLogin() {
+  $("loginPass").value = '';
+  $("loginMask").classList.add('show');
+  setTimeout(function(){ $("loginPass").focus(); }, 120);
+}
+
+function closeLogin() { $("loginMask").classList.remove('show'); }
+
+function doLogin() {
+  var p = ($("loginPass").value || '').trim();
+  if(!p){ toast('请输入密码','err'); return; }
+  var btn = $("loginOk");
+  btn.disabled = true; btn.textContent = '验证中…';
+  fetch(BASE + '/api/admin/wishes', { headers: { 'X-Admin-Pass': p } })
+    .then(function(r){
+      btn.disabled = false; btn.textContent = '登录';
+      if(r.status === 401){ toast('密码错误','err'); return; }
+      if(!r.ok){ toast('登录失败','err'); return; }
+      return r.json().then(function(d){
+        admin.pass = p;
+        admin.on = true;
+        admin.statuses = d.statuses || [];
+        try { sessionStorage.setItem('wish_admin_pass', p); } catch(e){}
+        closeLogin();
+        enterAdminMode();
+        toast('已进入管理员模式','ok');
+      });
+    }).catch(function(){ btn.disabled = false; btn.textContent = '登录'; toast('网络异常','err'); });
+}
+
+function enterAdminMode() {
+  $("adminBar").classList.add('show');
+  $("adminBtn").style.display = 'none';
+  admin.view = 'active';
+  $("tabActive").classList.add('on');
+  $("tabTrash").classList.remove('on');
+  // 管理模式关掉实时流与轮询，避免覆盖管理列表
+  try { if(es){ es.close(); es = null; } } catch(e){}
+  stopPolling();
+  loadAdmin();
+}
+
+function exitAdminMode() {
+  admin.on = false; admin.pass = '';
+  try { sessionStorage.removeItem('wish_admin_pass'); } catch(e){}
+  $("adminBar").classList.remove('show');
+  $("adminBtn").style.display = '';
+  load();
+  startSSE();
+}
+
+function statusMeta(id) {
+  for(var i=0;i<admin.statuses.length;i++){
+    if(admin.statuses[i].id === id) return admin.statuses[i];
+  }
+  return { id: id, name: id, color: '#8B95B0' };
+}
+
+function loadAdmin() {
+  var url = BASE + '/api/admin/wishes' + (admin.view === 'trash' ? '?deleted=1' : '');
+  fetch(url, { headers: adminHeaders(), cache: 'no-store' })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '加载失败','err'); return; }
+      admin.statuses = d.statuses || admin.statuses;
+      $("trashCount").textContent = d.stats ? (d.stats.trashed || 0) : 0;
+      state.items = (d.items || []).map(function(w){
+        w.voted = false; w.claim_mine = false; w._admin = true;
+        return w;
+      });
+      renderStats(d.stats);
+      render();
+      $("countLabel").textContent = admin.view === 'trash'
+        ? ('回收站 ' + state.items.length + ' 个')
+        : ('正常 ' + state.items.length + ' 个');
+    }).catch(function(){ toast('加载失败','err'); });
+}
+
+function setStatus(id, st) {
+  fetch(BASE + '/api/admin/status?id=' + id + '&status=' + encodeURIComponent(st), {
+    method: 'POST', headers: adminHeaders()
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '操作失败','err'); return; }
+      toast('状态已改为「' + statusMeta(st).name + '」','ok');
+      loadAdmin();
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+function askDelete(w) {
+  if(!confirm('删除愿望「' + w.title + '」？\n删除后可在「回收站」恢复。')) return;
+  fetch(BASE + '/api/admin/wish/' + w.id, { method: 'DELETE', headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '删除失败','err'); return; }
+      toast('已删除，可在回收站恢复','ok');
+      loadAdmin();
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+function restoreOne(w) {
+  fetch(BASE + '/api/admin/restore?id=' + w.id, { method: 'POST', headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '恢复失败','err'); return; }
+      toast('已恢复','ok');
+      loadAdmin();
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+function hardDelete(w) {
+  if(!confirm('彻底删除「' + w.title + '」？\n此操作不可恢复（连带投票与认领记录）。')) return;
+  fetch(BASE + '/api/admin/wish/' + w.id + '?hard=1', { method: 'DELETE', headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '删除失败','err'); return; }
+      toast('已彻底删除','ok');
+      loadAdmin();
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+function purgeTrash() {
+  if(!confirm('清空回收站？所有已删除愿望将被彻底移除，不可恢复。')) return;
+  fetch(BASE + '/api/admin/purge', { method: 'POST', headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '操作失败','err'); return; }
+      toast('已清空 ' + (d.purged || 0) + ' 个','ok');
+      loadAdmin();
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+// ---------------- 发布更新 ----------------
+function openRelease() {
+  fetch(BASE + '/api/admin/pkg', { headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){ toast(d.error || '读取失败','err'); return; }
+      var sel = $("relFile");
+      sel.innerHTML = '';
+      (d.files || []).forEach(function(f){
+        var o = document.createElement('option');
+        o.value = f.name;
+        o.textContent = f.name + '  (' + fmtSize(f.size) + ')';
+        sel.appendChild(o);
+      });
+      if(!(d.files || []).length){
+        var o = document.createElement('option');
+        o.value = ''; o.textContent = '（pkg 目录为空，请先上传）';
+        sel.appendChild(o);
+      }
+      var rel = d.release;
+      $("relCurrent").textContent = rel
+        ? ('当前发布 v' + rel.version + ' · ' + (rel.force ? '强制' : '可选') + ' · ' + fmtSize(rel.size))
+        : '尚未发布任何版本';
+      if(rel){
+        $("relVersion").value = rel.version || '';
+        $("relNotes").value = rel.notes || '';
+        $("relForce").checked = !!rel.force;
+        if(rel.file){ sel.value = rel.file; }
+      }
+      $("relMask").classList.add('show');
+    }).catch(function(){ toast('网络异常','err'); });
+}
+
+function fmtSize(n){
+  n = Number(n) || 0;
+  if(n <= 0) return '0 B';
+  if(n < 1024) return n + ' B';
+  if(n < 1048576) return (n/1024).toFixed(1) + ' KB';
+  return (n/1048576).toFixed(2) + ' MB';
+}
+
+function uploadPkg(file, cb) {
+  var btn = $("relOk");
+  btn.disabled = true; btn.textContent = '上传中…';
+  fetch(BASE + '/api/admin/pkg/upload?name=' + encodeURIComponent(file.name), {
+    method: 'PUT', headers: { 'X-Admin-Pass': admin.pass }, body: file
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.disabled = false; btn.textContent = '发布';
+      if(!d.ok){ toast(d.error || '上传失败','err'); return; }
+      toast('上传成功 ' + fmtSize(d.size),'ok');
+      cb && cb(d);
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = '发布';
+      toast('上传失败','err');
+    });
+}
+
+function saveRelease() {
+  var file = $("relFile").value;
+  var version = ($("relVersion").value || '').trim();
+  if(!file){ toast('请先选择安装包','err'); return; }
+  if(!version){ toast('请填写版本号','err'); $("relVersion").focus(); return; }
+  var btn = $("relOk");
+  btn.disabled = true; btn.textContent = '发布中…';
+  var q = '?version=' + encodeURIComponent(version)
+    + '&file=' + encodeURIComponent(file)
+    + '&notes=' + encodeURIComponent($("relNotes").value || '')
+    + '&force=' + ($("relForce").checked ? 1 : 0)
+    + '&platform=rk';
+  fetch(BASE + '/api/admin/release/save' + q, { method:'POST', headers: adminHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.disabled = false; btn.textContent = '发布';
+      if(!d.ok){ toast(d.error || '发布失败','err'); return; }
+      $("relMask").classList.remove('show');
+      toast('已发布 v' + d.release.version,'ok');
+    }).catch(function(){
+      btn.disabled = false; btn.textContent = '发布';
+      toast('网络异常','err');
+    });
+}
+
+// ---------------- Toast ----------------
+function toast(msg, kind){
+  var box = $("toasts");
+  var t = el("div", "toast " + (kind||""));
+  t.textContent = msg;
+  box.appendChild(t);
+  setTimeout(function(){
+    t.classList.add("out");
+    setTimeout(function(){ if(t.parentNode) t.parentNode.removeChild(t); }, 320);
+  }, 2400);
+}
+
+// ---------------- 统计（带数字滚动 + bump） ----------------
+var shown = {wishes:0,votes:0,today:0,contributors:0};
+function animateNum(id, key, to){
+  var node = $(id);
+  if(!node) return;
+  var from = shown[key] || 0;
+  if(from === to){ node.textContent = to; return; }
+  shown[key] = to;
+  var start = performance.now(), dur = 620;
+  function step(now){
+    var p = Math.min(1, (now-start)/dur);
+    var e = 1 - Math.pow(1-p, 3);
+    node.textContent = Math.round(from + (to-from)*e);
+    if(p < 1) requestAnimationFrame(step);
+    else node.textContent = to;
+  }
+  requestAnimationFrame(step);
+  node.classList.remove("bump");
+  void node.offsetWidth;
+  node.classList.add("bump");
+}
+function renderStats(st){
+  if(!st) return;
+  state.stats = st;
+  animateNum("s-wishes","wishes",st.wishes|0);
+  animateNum("s-votes","votes",st.votes|0);
+  animateNum("s-today","today",st.today|0);
+  animateNum("s-contrib","contributors",st.contributors|0);
+}
+
+// ---------------- 分类筛选 ----------------
+function renderCats(){
+  var box = $("cats");
+  box.innerHTML = "";
+  var all = el("div", "cat" + (state.category===""?" on":""), "全部");
+  if(state.category==="") all.style.cssText = "color:#fff;background:linear-gradient(120deg,#5B8CFF,#22D3B8);border-color:transparent";
+  all.onclick = function(){ state.category=""; renderCats(); load(); };
+  box.appendChild(all);
+  state.categories.forEach(function(c){
+    var d = el("div", "cat" + (state.category===c.id?" on":""), c.name);
+    if(state.category===c.id){ d.style.color="#fff"; d.style.background=c.color; d.style.borderColor="transparent"; }
+    d.onclick = function(){ state.category = (state.category===c.id?"":c.id); renderCats(); load(); };
+    box.appendChild(d);
+  });
+}
+
+// ---------------- 渲染列表 ----------------
+function maxVotes(){
+  var m = 1;
+  state.items.forEach(function(w){ if(w.votes > m) m = w.votes; });
+  return m;
+}
+function avatarColor(name){
+  var h = 0, s = String(name||"?");
+  for(var i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) % 360;
+  return "hsl(" + h + ",72%,66%)";
+}
+function render(){
+  var list = $("list");
+  var items = state.items;
+  $("countLabel").textContent = items.length ? ("共 " + items.length + " 个愿望") : "";
+
+  if(!items.length){
+    list.innerHTML = '<div class="empty"><div class="ico"><svg class="ic ic-52"><use href="#i-moon"/></svg></div>'
+      + '<h4>这里还是一片星空</h4>'
+      + '<p>还没有符合条件的愿望<br>成为第一个许愿的人吧</p></div>';
+    return;
+  }
+
+  var mx = maxVotes();
+  var frag = document.createDocumentFragment();
+
+  items.forEach(function(w, i){
+    var c = catOf(w.category);
+    var card = el("div", "card" + (state.newIds[w.id] ? " is-new" : ""));
+    card.style.setProperty("--cc", c.color);
+    card.style.animationDelay = Math.min(i, 14) * 26 + "ms";
+
+    // 排名
+    var rank = el("div", "rank");
+    var medalName = i === 0 ? "i-crown" : (i === 1 ? "i-medal" : (i === 2 ? "i-medal" : ""));
+    if(medalName){
+      var med = el("div","medal");
+      med.innerHTML = '<svg class="ic ' + (i === 0 ? 'ic-18' : 'ic-16') + '"><use href="#' + medalName + '"/></svg>';
+      if(i === 1) med.style.color = "#CBD5E8";
+      else if(i === 2) med.style.color = "#E0A273";
+      else med.style.color = "#FFD45E";
+      rank.appendChild(med);
+    }
+    rank.appendChild(el("div","rank-n", String(i+1)));
+    card.appendChild(rank);
+
+    // 主体
+    var main = el("div","main");
+    var topLine = el("div","top-line");
+    topLine.appendChild(el("div","w-title", w.title));
+    var tag = el("span","tag", c.name);
+    tag.style.color = c.color;
+    tag.style.background = c.color + "1f";
+    topLine.appendChild(tag);
+
+    // 状态徽标（管理模式下全部显示，普通模式只显示非待认领）
+    if(w.status && (admin.on || w.status !== 'open')){
+      var sm = statusMeta(w.status);
+      var sb = el("span", "st st-" + w.status);
+      sb.appendChild(el("span","st-dot"));
+      sb.appendChild(el("span", null, sm.name));
+      topLine.appendChild(sb);
+    }
+    main.appendChild(topLine);
+
+    if(w.desc) main.appendChild(el("div","w-desc", w.desc));
+
+    var meta = el("div","meta");
+    var who = el("div","who");
+    var av = el("div","avatar", String(w.nick||"匿").slice(0,1));
+    av.style.setProperty("--av", avatarColor(w.nick));
+    who.appendChild(av);
+    who.appendChild(el("span", null, w.nick || "匿名笔友"));
+    meta.appendChild(who);
+    meta.appendChild(el("span", null, timeAgo(w.created_at)));
+
+    // 认领状态 / 认领入口
+    if(w.claimed){
+      var badge = el("button", "claim-badge" + (w.claim_mine ? " mine" : ""));
+      badge.appendChild(el("span", "claim-dot"));
+      var bIc = el("span", "ic ic-10");
+      bIc.innerHTML = '<svg><use href="#i-flag"/></svg>';
+      badge.appendChild(bIc);
+      badge.appendChild(el("span", null, (w.claim_mine ? "我" : w.claimed_by) + " 认领中"));
+      badge.title = "由「" + w.claimed_by + "」认领 · " + timeAgo(w.claimed_at) +
+                    (w.claim_mine ? " · 点击可释放" : "");
+      badge.onclick = function(ev){ ev.stopPropagation(); onClaimClick(w, ev); };
+      meta.appendChild(badge);
+    } else {
+      var cbtn = el("button", "claim-btn");
+      var cIc = el("span", "ic ic-10");
+      cIc.innerHTML = '<svg><use href="#i-flag"/></svg>';
+      cbtn.appendChild(cIc);
+      cbtn.appendChild(el("span", null, " 认领"));
+      cbtn.title = "我来做这个功能";
+      cbtn.onclick = function(ev){ ev.stopPropagation(); onClaimClick(w, ev); };
+      meta.appendChild(cbtn);
+    }
+
+    var heat = el("div","heat");
+    var track = el("div","heat-track");
+    var fill = el("div","heat-fill");
+    fill.style.width = Math.max(4, Math.round(w.votes / mx * 100)) + "%";
+    track.appendChild(fill);
+    heat.appendChild(track);
+    meta.appendChild(heat);
+    main.appendChild(meta);
+
+    // 管理操作
+    if(admin.on){
+      var ops = el("div","card-ops");
+      if(admin.view === 'trash'){
+        var bRestore = el("button","op op-done","恢复");
+        bRestore.onclick = function(ev){ ev.stopPropagation(); restoreOne(w); };
+        ops.appendChild(bRestore);
+        var bHard = el("button","op op-del","彻底删除");
+        bHard.onclick = function(ev){ ev.stopPropagation(); hardDelete(w); };
+        ops.appendChild(bHard);
+      } else {
+        var cur = w.status || 'open';
+        var defs = [
+          { id: 'open', label: '待认领', cls: 'op' },
+          { id: 'doing', label: '开发中', cls: 'op op-doing' },
+          { id: 'done', label: '已上线', cls: 'op op-done' },
+          { id: 'rejected', label: '暂不做', cls: 'op op-rej' }
+        ];
+        defs.forEach(function(d){
+          var b = el("button", d.cls + (cur === d.id ? ' op-on' : ''), d.label);
+          b.onclick = function(ev){ ev.stopPropagation(); if(cur !== d.id) setStatus(w.id, d.id); };
+          ops.appendChild(b);
+        });
+        var bDel = el("button","op op-del","删除");
+        bDel.onclick = function(ev){ ev.stopPropagation(); askDelete(w); };
+        ops.appendChild(bDel);
+      }
+      main.appendChild(ops);
+    }
+
+    card.appendChild(main);
+
+    // +1（管理模式不显示）
+    if(!admin.on){
+      var btn = el("button","vote" + (w.voted ? " voted" : ""));
+      var plusEl = el("div","plus");
+      plusEl.innerHTML = w.voted
+        ? '<svg class="ic ic-12"><use href="#i-check"/></svg>'
+        : '+1';
+      btn.appendChild(plusEl);
+      btn.appendChild(el("div","cnt", String(w.votes)));
+      btn.appendChild(el("div","lbl", "支持"));
+      btn.onclick = function(ev){ doVote(w.id, btn, ev); };
+      card.appendChild(btn);
+    } else {
+      var cntBox = el("div","vote");
+      cntBox.style.cursor = "default";
+      cntBox.appendChild(el("div","cnt", String(w.votes)));
+      cntBox.appendChild(el("div","lbl", "支持"));
+      card.appendChild(cntBox);
+    }
+
+    frag.appendChild(card);
+  });
+
+  list.innerHTML = "";
+  list.appendChild(frag);
+  state.newIds = {};
+}
+
+// ---------------- 数据加载 ----------------
+function load(){
+  var url = BASE + "/api/wishes?sort=" + encodeURIComponent(state.sort)
+    + "&limit=200&client_id=" + encodeURIComponent(state.clientId||"")
+    + (state.category ? "&category=" + encodeURIComponent(state.category) : "")
+    + (state.q ? "&q=" + encodeURIComponent(state.q) : "");
+  fetch(url, {cache:"no-store"})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      state.items = d.items || [];
+      state.rev = d.rev || 0;
+      $("rev").textContent = "rev " + state.rev;
+      renderStats(d.stats);
+      render();
+    })
+    .catch(function(e){
+      // 静默：SSE 会补
+      console.warn("load failed", e);
+    });
+}
+
+// ---------------- +1 ----------------
+function doVote(id, btn, ev){
+  if(btn.classList.contains("voted")){
+    // 取消支持
+    fetch(BASE + "/api/wish/" + id + "/unvote?client_id=" + encodeURIComponent(state.clientId||""), {method:"POST"})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if(!d.ok){ toast(d.error||"操作失败","err"); return; }
+        var w = findItem(id);
+        if(w){ w.votes = d.wish.votes; w.voted = false; }
+        renderStats(d.stats);
+        render();
+      }).catch(function(){ toast("网络异常","err"); });
+    return;
+  }
+  // 乐观更新
+  var w = findItem(id);
+  var oldVotes = w ? w.votes : 0;
+  if(w){ w.votes = oldVotes + 1; w.voted = true; }
+  btn.classList.add("voted");
+  btn.querySelector(".plus").innerHTML = '<svg class="ic ic-12"><use href="#i-check"/></svg>';
+  btn.querySelector(".cnt").textContent = String(oldVotes + 1);
+  btn.classList.remove("pop"); void btn.offsetWidth; btn.classList.add("pop");
+  spawnFloaty(ev);
+
+  fetch(BASE + "/api/wish/" + id + "/vote?client_id=" + encodeURIComponent(state.clientId||""), {method:"POST"})
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.ok){
+        toast(d.error||"操作失败","err");
+        if(w){ w.votes = oldVotes; w.voted = false; }
+        render();
+        return;
+      }
+      if(w){ w.votes = d.wish.votes; w.voted = true; }
+      renderStats(d.stats);
+      // 不整表重排，避免视觉跳动；SSE 到位后会同步
+      var node = btn.querySelector(".cnt");
+      if(node) node.textContent = String(d.wish.votes);
+    })
+    .catch(function(){
+      toast("网络异常，请重试","err");
+      if(w){ w.votes = oldVotes; w.voted = false; }
+      render();
+    });
+}
+function findItem(id){
+  for(var i=0;i<state.items.length;i++) if(state.items[i].id===id) return state.items[i];
+  return null;
+}
+function spawnFloaty(ev){
+  if(!ev) return;
+  var f = el("div","floaty","+1");
+  f.style.left = ev.clientX + "px";
+  f.style.top = (ev.clientY - 12) + "px";
+  document.body.appendChild(f);
+  setTimeout(function(){ if(f.parentNode) f.parentNode.removeChild(f); }, 1000);
+}
+
+// ---------------- 提交 ----------------
+function submit(){
+  var title = $("in-title").value.trim();
+  var desc = $("in-desc").value.trim();
+  var nick = $("in-nick").value.trim();
+  if(title.length < 2){ toast("标题至少 2 个字","err"); $("in-title").focus(); return; }
+  var btn = $("submitBtn");
+  btn.disabled = true; btn.textContent = "提交中…";
+  fetch(BASE + "/api/wish", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      title:title, desc:desc, nick:nick,
+      category: state.category || "other",
+      client_id: state.clientId
+    })
+  }).then(function(r){ return r.json(); })
+    .then(function(d){
+      btn.disabled = false; btn.textContent = "提交愿望";
+      if(!d.ok){ toast(d.error||"提交失败","err"); return; }
+      $("in-title").value = ""; $("in-desc").value = ""; $("counter").textContent = "0 / 40";
+      if(nick) store("wish_nick", nick);
+      toast("愿望已发布，等待大家 +1","ok");
+      state.newIds[d.wish.id] = 1;
+      if(state.sort === "votes") state.sort = "new", syncSeg();
+      renderStats(d.stats);
+      load();
+    })
+    .catch(function(){
+      btn.disabled = false; btn.textContent = "提交愿望";
+      toast("网络异常，请重试","err");
+    });
+}
+
+// ---------------- SSE 实时流 ----------------
+var es = null, esRetry = 0, pollTimer = null;
+function setLive(on, txt){
+  $("liveDot").className = "dot" + (on ? "" : " off");
+  $("liveTxt").textContent = txt;
+}
+function startSSE(){
+  // 调试/静态截图模式：?nosse=1 关闭实时流，避免长连接阻塞页面快照
+  if(/[?&]nosse=1/.test(location.search)){ load(); return; }
+  if(!window.EventSource){ startPolling(); return; }
+  try{ if(es) es.close(); }catch(e){}
+  var url = BASE + "/api/stream?sort=" + encodeURIComponent(state.sort)
+    + "&client_id=" + encodeURIComponent(state.clientId||"");
+  es = new EventSource(url);
+  es.addEventListener("snapshot", function(e){
+    try{
+      var d = JSON.parse(e.data);
+      state.items = d.items || [];
+      state.rev = d.rev || 0;
+      $("rev").textContent = "rev " + state.rev;
+      renderStats(d.stats);
+      render();
+      setLive(true, "实时同步中");
+      esRetry = 0;
+      stopPolling();
+    }catch(_){}
+  });
+  es.addEventListener("wish_added", function(e){
+    var d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+    if(d.wish && d.wish.id){ state.newIds[d.wish.id] = 1; }
+    setLive(true, "实时同步中");
+    // 拉一次保证排序/筛选正确
+    load();
+  });
+  es.addEventListener("wish_voted", function(e){
+    var d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+    var w = d.wish && findItem(d.wish.id);
+    if(w){ w.votes = d.wish.votes; }
+    setLive(true, "实时同步中");
+    render();
+  });
+  es.addEventListener("wish_deleted", function(){
+    setLive(true, "实时同步中");
+    load();
+  });
+  es.addEventListener("wish_claimed", function(e){
+    var d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+    if(d.wish && d.wish.id){
+      var w = findItem(d.wish.id);
+      if(w){
+        w.claimed = !!d.wish.claimed_by;
+        w.claimed_by = d.wish.claimed_by || "";
+        w.claim_mine = !!d.wish.claimed_by && d.wish.claimed_by === state.nick;
+        if(d.wish.claimed_by) w.claimed_at = Math.floor(Date.now()/1000);
+      }
+    }
+    setLive(true, "实时同步中");
+    render();
+    load();   // 同步 stats 与排序
+  });
+  es.addEventListener("wish_released", function(e){
+    var d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+    if(d.wish && d.wish.id){
+      var w = findItem(d.wish.id);
+      if(w){ w.claimed = false; w.claimed_by = ""; w.claim_mine = false; w.claimed_at = 0; }
+    }
+    setLive(true, "实时同步中");
+    render();
+    load();
+  });
+  es.addEventListener("wish_status", function(e){
+    var d; try{ d = JSON.parse(e.data); }catch(_){ return; }
+    if(d.wish && d.wish.id){
+      var w = findItem(d.wish.id);
+      if(w) w.status = d.wish.status;
+      setLive(true, "实时同步中");
+      render();
+    }
+  });
+  es.addEventListener("wish_restored", function(){
+    setLive(true, "实时同步中");
+    load();
+  });
+  es.onopen = function(){ setLive(true, "实时同步中"); };
+  es.onerror = function(){
+    setLive(false, "连接中断，重连中…");
+    try{ es.close(); }catch(e){}
+    es = null;
+    esRetry++;
+    startPolling();
+    var delay = Math.min(1000 * Math.pow(1.6, Math.min(esRetry,5)), 15000);
+    setTimeout(startSSE, delay);
+  };
+}
+function startPolling(){
+  if(pollTimer) return;
+  pollTimer = setInterval(load, 5000);
+}
+function stopPolling(){
+  if(pollTimer){ clearInterval(pollTimer); pollTimer = null; }
+}
+
+// ---------------- 事件绑定 ----------------
+function syncSeg(){
+  var btns = $("seg").querySelectorAll("button");
+  for(var i=0;i<btns.length;i++) btns[i].classList.toggle("on", btns[i].getAttribute("data-sort")===state.sort);
+}
+function bind(){
+  var btns = $("seg").querySelectorAll("button");
+  for(var i=0;i<btns.length;i++){
+    btns[i].onclick = function(){
+      state.sort = this.getAttribute("data-sort");
+      syncSeg();
+      load();
+      startSSE();
+    };
+  }
+  $("composeBtn").onclick = function(){
+    var c = $("compose");
+    c.scrollIntoView({behavior:"smooth", block:"center"});
+    setTimeout(function(){ $("in-title").focus(); }, 420);
+  };
+  $("submitBtn").onclick = submit;
+  $("in-title").addEventListener("input", function(){
+    var n = this.value.length;
+    var c = $("counter");
+    c.textContent = n + " / 40";
+    c.classList.toggle("warn", n >= 36);
+  });
+  $("in-title").addEventListener("keydown", function(e){ if(e.key === "Enter") $("in-desc").focus(); });
+  var qt = null;
+  $("in-q").addEventListener("input", function(){
+    var v = this.value.trim();
+    clearTimeout(qt);
+    qt = setTimeout(function(){ state.q = v; load(); }, 260);
+  });
+
+  // 管理员
+  $("adminBtn").onclick = openLogin;
+  $("loginOk").onclick = doLogin;
+  $("loginCancel").onclick = closeLogin;
+  $("loginMask").addEventListener("click", function(e){ if(e.target === this) closeLogin(); });
+  $("loginPass").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); doLogin(); }
+  });
+  $("tabActive").onclick = function(){
+    admin.view = 'active';
+    $("tabActive").classList.add('on');
+    $("tabTrash").classList.remove('on');
+    loadAdmin();
+  };
+  $("tabTrash").onclick = function(){
+    admin.view = 'trash';
+    $("tabTrash").classList.add('on');
+    $("tabActive").classList.remove('on');
+    loadAdmin();
+  };
+  $("btnPurge").onclick = purgeTrash;
+  $("btnRelease").onclick = openRelease;
+  $("btnLogout").onclick = exitAdminMode;
+
+  // 发布更新
+  $("relCancel").onclick = function(){ $("relMask").classList.remove('show'); };
+  $("relMask").addEventListener("click", function(e){ if(e.target === this) this.classList.remove('show'); });
+  $("relOk").onclick = function(){
+    var f = $("relUpload").files && $("relUpload").files[0];
+    if(f){ uploadPkg(f, function(){ openRelease(); }); return; }
+    saveRelease();
+  };
+  $("relFile").onchange = function(){
+    var name = this.value || '';
+    var m = /(\d+\.\d+\.\d+)/.exec(name);
+    if(m && !$("relVersion").value) $("relVersion").value = m[1];
+  };
+
+  // 认领弹窗
+  $("claimOk").onclick = submitClaim;
+  $("claimCancel").onclick = closeClaimModal;
+  $("claimMask").addEventListener("click", function(e){
+    if(e.target === this) closeClaimModal();
+  });
+  $("claimNick").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); $("claimPass").focus(); }
+    if(e.key === "Escape"){ closeClaimModal(); }
+  });
+  $("claimPass").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); submitClaim(); }
+    if(e.key === "Escape"){ closeClaimModal(); }
+  });
+  document.addEventListener("keydown", function(e){
+    if(e.key === "Escape" && $("claimMask").classList.contains("show")) closeClaimModal();
+  });
+}
+
+// ---------------- 启动 ----------------
+function boot(){
+  state.clientId = store("wish_cid");
+  if(!state.clientId){
+    state.clientId = "web_" + Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+    store("wish_cid", state.clientId);
+  }
+  state.nick = store("wish_nick") || "";
+  if(state.nick) $("in-nick").value = state.nick;
+
+  bind();
+  fetch(BASE + "/api/meta").then(function(r){ return r.json(); }).then(function(m){
+    state.categories = m.categories || [];
+    state.statuses = m.statuses || [];
+    admin.statuses = m.statuses || [];
+    renderCats();
+    // 恢复管理员会话
+    var saved = '';
+    try { saved = sessionStorage.getItem('wish_admin_pass') || ''; } catch(e){}
+    if(saved){
+      admin.pass = saved;
+      fetch(BASE + '/api/admin/wishes', { headers: { 'X-Admin-Pass': saved } })
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){
+          if(d && d.ok){
+            admin.on = true;
+            admin.statuses = d.statuses || admin.statuses;
+            enterAdminMode();
+          } else {
+            load(); startSSE();
+          }
+        }).catch(function(){ load(); startSSE(); });
+      return;
+    }
+    load();
+    startSSE();
+  }).catch(function(){
+    load();
+    startSSE();
+  });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+else boot();
+
+})();
+</script>
+</body>
+</html>
