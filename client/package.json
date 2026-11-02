@@ -1,0 +1,23 @@
+{
+  "name": "许愿池",
+  "icon": "icon.png",
+  "appid": "8001865309000101",
+  "version": "1.3.0",
+  "description": "词典笔许愿池：说出你想要的 App 与功能，大家一起 +1",
+  "quickjs": {
+    "version": "20200705",
+    "bigNum": false
+  },
+  "single-js-bundle": false,
+  "scripts": {
+    "start": "aiot-cli preview",
+    "build": "aiot-cli -p",
+    "build:bin": "aiot-cli -q -p",
+    "build:prod": "aiot-cli -c -q -p",
+    "build:simulator": "aiot-cli simulator ./"
+  },
+  "dependencies": {
+    "aiot-vue-cli": "^1.0.32",
+    "falcon-ui": "^2.0.2"
+  }
+}
