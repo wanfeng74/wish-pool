@@ -1,0 +1,36 @@
+[Unit]
+Description=Wish Pool Server (许愿池)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/wishpool
+
+# 多端口监听：32894 为对外映射端口，17613 为内网/隧道端口
+Environment=PORT=32894,17613
+Environment=HOST=0.0.0.0
+Environment=DB_PATH=/opt/wishpool/wish.db
+Environment=LOG_PATH=/opt/wishpool/wish.log
+Environment=PANEL_PATH=/opt/wishpool/panel.html
+Environment=MAX_BODY=65536
+Environment=RATE_WINDOW_S=60
+Environment=RATE_SUBMIT=20
+Environment=RATE_VOTE=240
+Environment=RATE_CLAIM=60
+Environment=PYTHONUNBUFFERED=1
+
+ExecStart=/usr/bin/python3 /opt/wishpool/wish_server.py
+Restart=always
+RestartSec=3
+LimitNOFILE=65535
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/opt/wishpool
+
+[Install]
+WantedBy=multi-user.target
